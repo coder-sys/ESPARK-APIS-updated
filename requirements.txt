@@ -9,3 +9,5 @@ Jinja2==3.0.1
 Pyrebase==3.0.27
 SQLAlchemy==1.4.23
 youtube-search-python==1.6.5
+requests==2.25.1
+requests==2.11.1
