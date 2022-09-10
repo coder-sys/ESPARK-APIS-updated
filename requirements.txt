@@ -7,6 +7,5 @@ googlesearch-python==1.1.0
 gunicorn==20.1.0
 Jinja2==3.0.1
 Pyrebase==3.0.27
-requests==2.11.1
 SQLAlchemy==1.4.23
 youtube-search-python==1.6.5
