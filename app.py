@@ -11,21 +11,22 @@ import requests
 def get_google_data(query):
     array = []
     array_urls = []
-    i= 0
     for url in search(query,12):
-        print (url)
+        print(url)
         array_urls.append(url)
         data = requests.get(url)
         soup = BeautifulSoup(data.text,'html.parser')
         for _ in soup.find_all('title'):
             print(_.get_text())
             array.append(_.get_text())
-        if len(array) > 29:   
+        if len(array) >= 19:
             break
     return [array,array_urls]
 
 app = Flask(__name__)
-
+def Union(lst1, lst2):
+    final_list = lst1 + lst2
+    return final_list
 firebaseConfig = {
   'apiKey': "AIzaSyCGvp-4gW3nC3fAHmnJDAx3Fbwsdzn_LRQ",
   'authDomain': "espark-356318.firebaseapp.com",
@@ -42,7 +43,7 @@ db = firebase.database()
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-cred = credentials.Certificate("espark-a18da-firebase-adminsdk-s233j-0ad1627f54.json")
+cred = credentials.Certificate("./espark-a18da-firebase-adminsdk-s233j-0ad1627f54.json")
 firebase_admin.initialize_app(cred)
 fd = firestore.client()
 fd.collection('data').document('info').set({'data':1})
@@ -76,9 +77,9 @@ def login(first_name):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
     try:
-        referance = db.child(f'Users/{first_name}').get()
-        print(dict(referance.val())['password'])
-        return {"data":dict(referance.val())['password']}
+        referance = db.child('Users/'+str(first_name)).get()
+        print(referance.val())
+        return {"data":referance.val()['password']}
     except:
         return {"data":"username not found"}
 @app.route('/add_folder/<name>/<foldername>',methods=['GET'])
@@ -151,7 +152,7 @@ def add_youtube_content(name,foldername,sourcename,sourcepath):
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-    fd.collection(name).document(foldername).collection("content_stored").add({'link':'https:__www.youtube.com_watch?v='+sourcepath,'name':sourcename})
+    fd.collection(name).document(foldername).collection("content_stored").add({'link':'https:``www.youtube.com`watch?v='+sourcepath,'name':sourcename})
     
     return{"status":sourcepath}
 @app.route('/get_youtube_data/<query>',methods=['GET'])
@@ -230,5 +231,101 @@ def verify_sign_in_information(name,lname):
             'info':data,
             'status':200
         }
+@app.route('/get_stored_links/<name>/<foldername>',methods=['GET'])
+def get_stored_links(name, foldername):
+    @after_this_request
+    def add_header(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    stored_data = fd.collection(name).document(foldername).collection('content_stored').get()
+    stored_data = list(stored_data)
+
+    array = []
+    for _ in stored_data:
+        array.append(_.to_dict())
+    name_extracted = []
+    title_extracted = []
+    print(name_extracted)
+    for _ in array:
+        name_extracted.append(_['link'])
+        title_extracted.append(_['name'])
+    print(name_extracted)
+    name_extracted_1 = []
+    for _ in name_extracted:
+        if _ == '`':
+            _ = '/'
+            print(_)
+        name_extracted_1.append(_)
+    print(title_extracted)
+    return {
+        'data':name_extracted_1,
+        'names_data':title_extracted
+    }
+@app.route('/find_similarity_links/<arr1>/<arr2>',methods=['GET'])
+def find_similarity_links(arr1,arr2):
+    @after_this_request
+    def add_header(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    disabled = []
+    i1 = 0
+    i2 = 0
+
+    arr1 = arr1.split(',')
+    arr2 = arr2.split(',')
+    print(list(arr1),list(arr2))
+
+    for i in list(arr1):
+        if i in list(arr2):
+            disabled.append(True)
+        else:
+            disabled.append(False)
+    return{
+        'data':disabled
+    }
+@app.route('/delete_folder/<name>/<foldername>',methods=['GET'])
+def delete_folder(name,foldername):
+    @after_this_request
+    def add_header(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    d = fd.collection(name).document(foldername).delete()
+
+    return{
+        'status':200
+    }
+
+@app.route('/delete_saved_data/<name>/<foldername>/<link>',methods=['GET'])
+def delete_saved_data(name,foldername,link):
+    def add_headers(response):
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+    _data_ = fd.collection(name).document(foldername).collection('content_stored').where(u'link','==',link).get()
+    _data_.update({'delete':True})
+    return {'status':200}
+
+
+
+@app.route('/get_no_of_stored_content/<name>/<foldername>',methods=['GET'])
+def get_no_of_stored_content(name,foldername):
+    @after_this_request
+    def add_header(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    data = fd.collection(name).document(foldername).collection('content_stored').get()
+    print(data)
+    data = [i.to_dict() for i in data]
+    print(data)
+    youtube_data = []
+    google_data = []
+    for i in data:
+
+        print(i['link'].split('`'))
+        if 'www.youtube.com' in i['link'].split('`'):
+            youtube_data.append(i)
+        else:            google_data.append(i)
+
+
+    return {'data':[youtube_data,google_data]}
 if __name__=='__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True,host="localhost",port=8000)
