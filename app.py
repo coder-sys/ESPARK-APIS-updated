@@ -142,7 +142,7 @@ def add_google_content(name,foldername,sourcename,sourcepath):
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-    fd.collection(name).document(foldername).collection("content_stored").add({'link':sourcepath,'name':sourcename})
+    fd.collection(name).document(foldername).collection("content_stored").add({'link':sourcepath,'name':sourcename,'delete':False})
     time.sleep(3)
     
     return{"status":sourcepath}
@@ -152,7 +152,7 @@ def add_youtube_content(name,foldername,sourcename,sourcepath):
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-    fd.collection(name).document(foldername).collection("content_stored").add({'link':'https:``www.youtube.com`watch?v='+sourcepath,'name':sourcename})
+    fd.collection(name).document(foldername).collection("content_stored").add({'link':'https:``www.youtube.com`watch?v='+sourcepath,'name':sourcename,'delete':False})
     
     return{"status":sourcepath}
 @app.route('/get_youtube_data/<query>',methods=['GET'])
@@ -185,7 +185,7 @@ def load_data(name,foldername):
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-    stored_data = fd.collection(name).document(foldername).collection('content_stored').get()
+    stored_data = fd.collection(name).document(foldername).collection('content_stored').where('delete','==',False).get()
     stored_data = list(stored_data)
     array = []
     for _ in stored_data:
