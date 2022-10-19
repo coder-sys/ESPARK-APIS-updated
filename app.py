@@ -142,7 +142,7 @@ def add_google_content(name,foldername,sourcename,sourcepath):
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-    fd.collection(name).document(foldername).collection("content_stored").add({'link':sourcepath,'name':sourcename,'delete':False})
+    fd.collection(name).document(foldername).collection("content_stored").document(name+foldername+sourcename).set({'link':sourcepath,'name':sourcename,'delete':False})
     time.sleep(3)
     
     return{"status":sourcepath}
@@ -152,7 +152,7 @@ def add_youtube_content(name,foldername,sourcename,sourcepath):
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-    fd.collection(name).document(foldername).collection("content_stored").add({'link':'https:``www.youtube.com`watch?v='+sourcepath,'name':sourcename,'delete':False})
+    fd.collection(name).document(foldername).collection("content_stored").document(name+foldername+sourcename).set({'link':'https:``www.youtube.com`watch?v='+sourcepath,'name':sourcename,'delete':False})
     
     return{"status":sourcepath}
 @app.route('/get_youtube_data/<query>',methods=['GET'])
@@ -185,7 +185,7 @@ def load_data(name,foldername):
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-    stored_data = fd.collection(name).document(foldername).collection('content_stored').where('delete','==',False).get()
+    stored_data = fd.collection(name).document(foldername).collection('content_stored').where(u'delete','==',False).get()
     stored_data = list(stored_data)
     array = []
     for _ in stored_data:
@@ -295,37 +295,41 @@ def delete_folder(name,foldername):
         'status':200
     }
 
-@app.route('/delete_saved_data/<name>/<foldername>/<link>',methods=['GET'])
-def delete_saved_data(name,foldername,link):
+@app.route('/delete_saved_data/<name>/<foldername>/<sourcename>',methods=['GET'])
+def delete_saved_data(name,foldername,sourcename):
     def add_headers(response):
         response.headers['Access-Control-Allow-Origin'] = '*'
         return response
-    _data_ = fd.collection(name).document(foldername).collection('content_stored').where(u'link','==',link).get()
+    _data_ = fd.collection(name).document(foldername).collection('content_stored').document(name+foldername+sourcename)
     _data_.update({'delete':True})
     return {'status':200}
 
 
 
-@app.route('/get_no_of_stored_content/<name>/<foldername>',methods=['GET'])
-def get_no_of_stored_content(name,foldername):
+@app.route('/get_no_of_stored_content/<name>/<folderarray>',methods=['GET'])
+def get_no_of_stored_content(name,folderarray):
     @after_this_request
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-    data = fd.collection(name).document(foldername).collection('content_stored').get()
-    print(data)
-    data = [i.to_dict() for i in data]
-    print(data)
-    youtube_data = []
-    google_data = []
-    for i in data:
+    total_yt_data = []
+    total_google_data = []
+    print('data is'+folderarray)
+    for foldername in folderarray.split('-'):
+        data = fd.collection(name).document(foldername).collection('content_stored').where('delete','==',False).get()
+        print(data)
+        data = [i.to_dict() for i in data]
+        print(data)
+        youtube_data = []
+        google_data = []
+        for i in data:
 
-        print(i['link'].split('`'))
-        if 'www.youtube.com' in i['link'].split('`'):
-            youtube_data.append(i)
-        else:            google_data.append(i)
-
-
-    return {'data':[youtube_data,google_data]}
+            print(i['link'].split('`'))
+            if 'www.youtube.com' in i['link'].split('`'):
+                youtube_data.append(i)
+            else:            google_data.append(i)
+        total_yt_data.append(len(youtube_data))
+        total_google_data.append(len(google_data))
+    return {'data':[total_yt_data,total_google_data]}
 if __name__=='__main__':
     app.run(debug=True,host="localhost",port=8000)
