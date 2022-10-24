@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 import requests
 
 def get_google_data(query):
+    isLoad = True
     array = []
     array_urls = []
     for url in search(query,12):
@@ -17,16 +18,18 @@ def get_google_data(query):
         data = requests.get(url)
         soup = BeautifulSoup(data.text,'html.parser')
         for _ in soup.find_all('title'):
+            print(isLoad)
             print(_.get_text())
             array.append(_.get_text())
+
         if len(array) >= 19:
             break
-    return [array,array_urls]
+
+    return [array, array_urls]
+
 
 app = Flask(__name__)
-def Union(lst1, lst2):
-    final_list = lst1 + lst2
-    return final_list
+
 firebaseConfig = {
   'apiKey': "AIzaSyCGvp-4gW3nC3fAHmnJDAx3Fbwsdzn_LRQ",
   'authDomain': "espark-356318.firebaseapp.com",
@@ -237,7 +240,7 @@ def get_stored_links(name, foldername):
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-    stored_data = fd.collection(name).document(foldername).collection('content_stored').get()
+    stored_data = fd.collection(name).document(foldername).collection('content_stored').where('delete','==',False).get()
     stored_data = list(stored_data)
 
     array = []
