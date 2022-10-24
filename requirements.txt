@@ -10,4 +10,3 @@ Pyrebase
 SQLAlchemy
 youtube-search-python
 requests
-requests
