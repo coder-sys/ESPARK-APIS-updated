@@ -24,8 +24,13 @@ def get_google_data(query):
 
         if len(array) >= 19:
             break
+    index_value = 0
+    array_names = []
+    for x in array_urls:
+        array_names.append(array[index_value])
+        index_value += 1
 
-    return [array, array_urls]
+    return [array_names, array_urls]
 
 
 app = Flask(__name__)
