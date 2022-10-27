@@ -127,11 +127,10 @@ def get_google_content(query):
 
     array = []
     array_urls = []
-    for url in search(query,10):
+    for url in search(query,7):
         print(url)
         array_urls.append(url)
         data = requests.get(url)
-        soup = BeautifulSoup(data.text, 'html.parser')
         parsed_url = urllib.parse.urlparse(url)
         array.append(parsed_url.netloc)
 
