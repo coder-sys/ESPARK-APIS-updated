@@ -4,33 +4,12 @@ import time
 from youtubesearchpython import VideosSearch
 
 from googlesearch import search
+import urllib.parse
 
 from bs4 import BeautifulSoup
 import requests
 
-def get_google_data(query):
-    isLoad = True
-    array = []
-    array_urls = []
-    for url in search(query,12):
-        print(url)
-        array_urls.append(url)
-        data = requests.get(url)
-        soup = BeautifulSoup(data.text,'html.parser')
-        for _ in soup.find_all('title'):
-            print(isLoad)
-            print(_.get_text())
-            array.append(_.get_text())
 
-        if len(array) >= 19:
-            break
-    index_value = 0
-    array_names = []
-    for x in array_urls:
-        array_names.append(array[index_value])
-        index_value += 1
-
-    return [array_names, array_urls]
 
 
 app = Flask(__name__)
@@ -124,12 +103,15 @@ def get_folders(name):
         d = fd.collection(name).get()
         print(d)
         data = []
+        if len(d)==0:
+            return {'data':[]}
         for _ in d:
             print("The value im looking for : ")
 
             print(_.to_dict())
             data.append(_.to_dict()['foldername'])
         return {'data':data}
+
 
     except:
         print('cannot do so')    
@@ -142,8 +124,21 @@ def get_google_content(query):
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-    x,y = get_google_data(query)
-    return{'names':x,'urls':y}
+
+    array = []
+    array_urls = []
+    for url in search(query,10):
+        print(url)
+        array_urls.append(url)
+        data = requests.get(url)
+        soup = BeautifulSoup(data.text, 'html.parser')
+        parsed_url = urllib.parse.urlparse(url)
+        array.append(parsed_url.netloc)
+
+    return {'names':array,'urls': array_urls}
+
+
+
 @app.route('/add_google_content/<name>/<foldername>/<sourcename>/<sourcepath>',methods=['GET'])
 def add_google_content(name,foldername,sourcename,sourcepath):
     @after_this_request
