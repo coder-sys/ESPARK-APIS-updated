@@ -125,19 +125,11 @@ def get_google_content(query):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
 
-    array = []
-    array_urls = []
-    for url in search(query):
-        print(url)
-        array_urls.append(url)
-        data = requests.get(url)
-        parsed_url = urllib.parse.urlparse(url)
-        array.append(parsed_url.netloc)
-        if len(array_urls) >6:
-                return {'names':array,'urls': array_urls}
+    array = [urllib.parse.urlparse(name).netloc for name in list(search(query))]
+    
+        
 
-        if len(array_urls) == 7:
-            return {'names':array,'urls': array_urls}
+    return {'names':array,'urls': list(search(query))}
     
 
 
