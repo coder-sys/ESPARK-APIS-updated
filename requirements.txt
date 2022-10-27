@@ -1,6 +1,6 @@
 beautifulsoup4==4.9.3
 firebase-admin==6.0.1
-Flask==2.2.2
+Flask==2.2.2 
 gcloud==0.18.3
 google-api-python-client==2.65.0
 google-cloud-firestore==2.7.2
