@@ -124,6 +124,7 @@ def get_google_content(query):
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
+    jsonified_data = []
 
     array = [urllib.parse.urlparse(name).netloc for name in list(search(query))]
     array_description = []
@@ -131,10 +132,12 @@ def get_google_content(query):
     page = ''
     pages = []
     for _ in list(search(query)):
-        page = metadata_parser.MetadataParser(_)
-        pages.append(page)
+        try:
+            page = metadata_parser.MetadataParser(_)
+            pages.append(page)
+        except:
+            jsonified_data.append("The description is hidden by the website")
     print(pages)
-    jsonified_data = []
     for data in pages:
         try:
             jsonified_data.append(data.metadata['meta']['description'])
