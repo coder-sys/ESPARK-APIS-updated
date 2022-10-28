@@ -1,8 +1,8 @@
 from flask import Flask,after_this_request
 import time
-
+import metadata_parser
 from youtubesearchpython import VideosSearch
-
+import urllib.request
 from googlesearch import search
 import urllib.parse
 
@@ -126,10 +126,21 @@ def get_google_content(query):
         return response
 
     array = [urllib.parse.urlparse(name).netloc for name in list(search(query))]
+    array_description = []
     
-        
-
-    return {'names':array,'urls': list(search(query))}
+    page = ''
+    pages = []
+    for _ in list(search(query)):
+        page = metadata_parser.MetadataParser(_)
+        pages.append(page)
+    print(pages)
+    jsonified_data = []
+    for data in pages:
+        try:
+            jsonified_data.append(data.metadata['meta']['description'])
+        except:
+            jsonified_data.append("The description is hidden by the website")
+    return {'description':jsonified_data,'names':array,'urls': list(search(query)),'equality':len(jsonified_data)==len(array)}
     
 
 
