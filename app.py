@@ -34,8 +34,8 @@ cred = credentials.Certificate("./espark-a18da-firebase-adminsdk-s233j-0ad1627f5
 firebase_admin.initialize_app(cred)
 fd = firestore.client()
 fd.collection('data').document('info').set({'data':1})
-@app.route('/sign_in/<input_name>/<input_name_0>/<password>/<email>',methods=['GET'])
-def sign_in(input_name,input_name_0,password,email):
+@app.route('/sign_in/<input_name>/<input_name_0>/<password>/<email>/<user_type>',methods=['GET'])
+def sign_in(input_name,input_name_0,password,email,user_type):
     @after_this_request
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
@@ -48,7 +48,8 @@ def sign_in(input_name,input_name_0,password,email):
         'lastname':lastname,
         'password':password,
         'email':email,
-        'no_of_folders':0
+        'no_of_folders':0,
+        'user_type':user_type
     })
     return {
         'firstname':input_name,
@@ -56,7 +57,18 @@ def sign_in(input_name,input_name_0,password,email):
         'password':password,
         'email':email
     }
-
+@app.route('/get_user_type/<name>',methods=['GET'])
+def get_user_type(name):
+    @after_this_request
+    def add_header(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    try:
+        referance = db.child('Users/'+str(name)).get()
+        print(referance.val())
+        return {"data":dict(referance.val())['user_type']}
+    except:
+        return {"data":"username not found"}
 @app.route('/login/<first_name>',methods=['GET'])
 def login(first_name):
     @after_this_request
@@ -82,7 +94,7 @@ def add_folder(name,foldername):
     except:
         print('cannot do so')    
         return {'data':"undoable"}
-@app.route('/add_folder/<name>',methods=['GET'])
+@app.route('/update_no_of_folders/<name>',methods=['GET'])
 def update_no_of_folders(name):
     @after_this_request
     def add_header(response):
@@ -127,10 +139,10 @@ def get_google_content(query):
     jsonified_data = []
 
     array = [urllib.parse.urlparse(name).netloc for name in list(search(query))]
-    array_description = []
-    
+
     page = ''
     pages = []
+
     for _ in list(search(query)):
         try:
             page = metadata_parser.MetadataParser(_)
@@ -143,7 +155,8 @@ def get_google_content(query):
             jsonified_data.append(data.metadata['meta']['description'])
         except:
             jsonified_data.append("The description is hidden by the website")
-    return {'description':jsonified_data,'names':array,'urls': list(search(query)),'equality':len(jsonified_data)==len(array)}
+
+    return {'description':jsonified_data,'names':array,'urls': list(search(query))}
     
 
 
@@ -179,6 +192,7 @@ def get_youtube_data(query):
     titlearray=[]
     thumbnailarray = []
     linkarray = []
+
 
     for i in videosSearch:
         print(i)
@@ -217,8 +231,8 @@ def get_last_name_and_email(name):
         'email':stored_data,
         'lastname':stored_data1
     }
-@app.route('/verify_sign_in_information/<name>/<lname>',methods=['GET'])
-def verify_sign_in_information(name,lname):
+@app.route('/verify_sign_in_information/<email>',methods=['GET'])
+def verify_sign_in_information(email):
     @after_this_request
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
@@ -227,8 +241,8 @@ def verify_sign_in_information(name,lname):
     resp = '-'
     if data:
         for i in data:
-            if (data[i]['lastname']+data[i]['firstname']) == (lname+name):
-                resp = 'change either of the names to continue'
+            if (data[i]['email']) == (email):
+                resp = 'change the associated email to continue,account already exists'
                 break
             else:
                 resp = 'good to go!'
@@ -309,14 +323,22 @@ def delete_folder(name,foldername):
 
 @app.route('/delete_saved_data/<name>/<foldername>/<sourcename>',methods=['GET'])
 def delete_saved_data(name,foldername,sourcename):
+    @after_this_request
     def add_headers(response):
         response.headers['Access-Control-Allow-Origin'] = '*'
         return response
     _data_ = fd.collection(name).document(foldername).collection('content_stored').document(name+foldername+sourcename)
     _data_.update({'delete':True})
     return {'status':200}
-
-
+@app.route('/view_student_data_alph_order',methods=['GET'])
+def view_student_data_alph_order():
+    @after_this_request
+    def add_header(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    data = db.child('/Users/').get().val()
+    print(dict(data))
+    return{'data':[data]}
 
 @app.route('/get_no_of_stored_content/<name>/<folderarray>',methods=['GET'])
 def get_no_of_stored_content(name,folderarray):
