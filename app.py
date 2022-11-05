@@ -9,7 +9,20 @@ import urllib.parse
 from bs4 import BeautifulSoup
 import requests
 
-
+def alpha_sort(test_array):
+    entire_array = []
+    init = 0
+    i = -1
+    for x in test_array:
+        i += 1
+        if test_array[i - 1]['firstname'][0] != test_array[i]['firstname'][0]:
+            entire_array.append(test_array[init:i])
+            init = i
+    print(init)
+    print(test_array[init])
+    entire_array.pop(0)
+    entire_array.append(test_array[init:])
+    return(entire_array)
 
 
 app = Flask(__name__)
@@ -102,10 +115,10 @@ def update_no_of_folders(name):
         return response
     no_of_folders = db.child(f'Users/{name}/no_of_folders').get().val()
     db.child(f'Users/{name}').update({
-        'no_of_folders':no_of_folders+1
+        'no_of_folders':int(no_of_folders)+1
     })
     return {'data':200,'no_of_folders':no_of_folders}
-@app.route('/get_folders/<name>')
+@app.route('/get_folders/<name>',methods=['GET'])
 def get_folders(name):
     @after_this_request
     def add_header(response):
@@ -147,6 +160,7 @@ def get_google_content(query):
         try:
             page = metadata_parser.MetadataParser(_)
             pages.append(page)
+           # pages = [metadata_parser.MetadataParser(_) for _ in list(search(query))]
         except:
             jsonified_data.append("The description is hidden by the website")
     print(pages)
@@ -197,7 +211,7 @@ def get_youtube_data(query):
     for i in videosSearch:
         print(i)
         titlearray.append(i['title'])
-        thumbnailarray.append(i['thumbnails'])
+        thumbnailarray.append(i['thumbnails'][0]['url'])
         linkarray.append(i['link'])
     return{
     'titles':titlearray,
@@ -225,11 +239,10 @@ def get_last_name_and_email(name):
     def add_header(response):
         response.headers.add('Access-Control-Allow-Origin', '*')
         return response
-    stored_data = db.child(f'Users/{name}/email').get().val()
-    stored_data1 = db.child(f"Users/{name}/lastname").get().val()
+
     return {
-        'email':stored_data,
-        'lastname':stored_data1
+        'email':db.child(f'Users/{name}/email').get().val(),
+        'lastname':db.child(f"Users/{name}/lastname").get().val()
     }
 @app.route('/verify_sign_in_information/<email>',methods=['GET'])
 def verify_sign_in_information(email):
@@ -338,7 +351,10 @@ def view_student_data_alph_order():
         return response
     data = db.child('/Users/').get().val()
     print(dict(data))
-    return{'data':[data]}
+    data2 = []
+    for i in data:
+        data2.append(data[i])
+    return{'data': alpha_sort(data2)}
 
 @app.route('/get_no_of_stored_content/<name>/<folderarray>',methods=['GET'])
 def get_no_of_stored_content(name,folderarray):
