@@ -401,7 +401,8 @@ def enroll_admin(firstname,lastname,email,password):
         'password':password,
         'email':email,
         'user_type':'admin',
-        'transactions':[]
+        'transactions':[],
+        'payment_timestamp':''
     }
     }
 if __name__=='__main__':
