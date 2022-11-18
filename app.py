@@ -381,6 +381,29 @@ def get_no_of_stored_content(name,folderarray):
         total_yt_data.append(len(youtube_data))
         total_google_data.append(len(google_data))
     return {'data':[total_yt_data,total_google_data]}
+@app.route('/enroll_admin/<firstname>/<lastname>/<email>/<password>',methods=['GET'])
+def enroll_admin(firstname,lastname,email,password):
+    @after_this_request
+    def add_header(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+    db.child(f'Users/{firstname}').set({
+        'firstname':firstname,
+        'lastname':lastname,
+        'password':password,
+        'email':email,
+        'user_type':'admin'
+    })
+    return {
+        'data':{
+        'firstname':firstname,
+        'lastname':lastname,
+        'password':password,
+        'email':email,
+        'user_type':'admin',
+        'transactions':[]
+    }
+    }
 if __name__=='__main__':
     app.run(debug=True,host="localhost",port=8000)
  
