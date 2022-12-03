@@ -1,14 +1,10 @@
 from flask import Flask,after_this_request
 import time
-import metadata_parser
 from youtubesearchpython import VideosSearch
 import urllib.request
-from googlesearch import search
 import urllib.parse
-import re
 import requests
-from yarl import URL
-from datetime import date,timedelta,datetime
+from datetime import date
 from ecommercetools import seo
 def same_link(d1,d2):
     return bool(d1==d2)
