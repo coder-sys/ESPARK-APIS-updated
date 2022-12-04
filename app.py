@@ -729,4 +729,4 @@ def monthly_fee():
     return {'data':count*10,'data_str':str(count*10)}
 if __name__=='__main__':
     app.run(debug=True,host="localhost",port=8000)
-
+ 
