@@ -133,7 +133,6 @@ def disect_array(test_array, test_array_1):
     return (entire_array)
 
 app = Flask(__name__)
-
 firebaseConfig = {
   'apiKey': "AIzaSyCGvp-4gW3nC3fAHmnJDAx3Fbwsdzn_LRQ",
   'authDomain': "espark-356318.firebaseapp.com",
@@ -728,5 +727,5 @@ def monthly_fee():
             count += 1
     return {'data':count*10,'data_str':str(count*10)}
 if __name__=='__main__':
-    app.run(debug=True,host="localhost",port=8000)
+    app.run(debug=True,host:'localhost',port:8000)
 
