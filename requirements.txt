@@ -90,7 +90,4 @@ websockets==10.4
 Werkzeug==2.2.2
 youtube-search-python==1.6.6
 gunicorn
-<<<<<<< HEAD
 yarl
-=======
->>>>>>> 897258ace547d2a98e68ddb31678a3e90d241022
