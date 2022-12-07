@@ -6,7 +6,6 @@ import urllib.parse
 import requests
 from datetime import date
 from ecommercetools import seo
-from flask_ngrok import run_with_ngrok
 def same_link(d1,d2):
     return bool(d1==d2)
 def listToString(s):
@@ -134,7 +133,6 @@ def disect_array(test_array, test_array_1):
     return (entire_array)
 
 app = Flask(__name__)
-run_with_ngrok(app)
 firebaseConfig = {
   'apiKey': "AIzaSyCGvp-4gW3nC3fAHmnJDAx3Fbwsdzn_LRQ",
   'authDomain': "espark-356318.firebaseapp.com",
@@ -729,5 +727,5 @@ def monthly_fee():
             count += 1
     return {'data':count*10,'data_str':str(count*10)}
 if __name__=='__main__':
-    app.run()
+    app.run(debug=True,host:'localhost',port:8000)
 
