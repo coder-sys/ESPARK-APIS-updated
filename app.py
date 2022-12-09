@@ -645,7 +645,7 @@ def get_results_on_conceptual_search(query,name,foldername):
         description_array.append(list(df['text']))
         name_array.append(list(df['title']))
         link_array.append(list(df['link']))
-    data = requests.get(f'http://localhost:8000/get_stored_links/{name}/{foldername}').json()
+    data = requests.get(f'http://35.193.47.255/get_stored_links/{name}/{foldername}').json()
     stored_data = data['data']
     stored_data_1 = []
     stored_data_2 = []
