@@ -11,7 +11,7 @@ def same_link(d1,d2):
 def listToString(s):
     # initialize an empty string
     str1 = ""
-    # traverse in the string
+    # traverse in the string 
     for ele in s:
         str1 += ele
     # return string
@@ -133,6 +133,7 @@ def disect_array(test_array, test_array_1):
     return (entire_array)
 
 app = Flask(__name__)
+
 firebaseConfig = {
   'apiKey': "AIzaSyCGvp-4gW3nC3fAHmnJDAx3Fbwsdzn_LRQ",
   'authDomain': "espark-356318.firebaseapp.com",
@@ -644,7 +645,7 @@ def get_results_on_conceptual_search(query,name,foldername):
         description_array.append(list(df['text']))
         name_array.append(list(df['title']))
         link_array.append(list(df['link']))
-    data = requests.get(f'http://localhost:8000/get_stored_links/{name}/{foldername}').json()
+    data = requests.get(f'http://35.193.47.255/get_stored_links/{name}/{foldername}').json()
     stored_data = data['data']
     stored_data_1 = []
     stored_data_2 = []
@@ -727,5 +728,9 @@ def monthly_fee():
             count += 1
     return {'data':count*10,'data_str':str(count*10)}
 if __name__=='__main__':
+<<<<<<< HEAD
     app.run()
+=======
+    app.run(debug=True,host="localhost",port=8000)
+>>>>>>> 927a298582477324621c90f8b95736115be7de83
 
