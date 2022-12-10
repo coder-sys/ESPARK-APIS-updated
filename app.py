@@ -281,18 +281,21 @@ def get_google_content(query):
         return response
 
     description_array = []
-    try:
-        df = seo.get_serps(query, pages=3)
-        description_array = list(df['text'])
-        name_array = list(df['title'])
-        site_urls_array = list(df['link'])
-        return {
-            'description':description_array,
-            'names':name_array,
-                'urls': site_urls_array
-        }
-    except:
-        return fallback_getter(query)
+    ERROR = True
+    while ERROR:
+        try:
+            df = seo.get_serps(query, pages=3)
+            description_array = list(df['text'])
+            name_array = list(df['title'])
+            site_urls_array = list(df['link'])
+            return {
+                'description':description_array,
+                'names':name_array,
+                    'urls': site_urls_array
+            }
+            ERROR = False
+        except:
+            pass
 
 
 @app.route('/add_google_content/<name>/<foldername>/<sourcename>/<sourcepath>/<description>',methods=['GET'])
@@ -642,8 +645,13 @@ def get_results_on_conceptual_search(query,name,foldername):
     link_array = []
     keywords = keyword_extraction(query)[1]
     for i in keywords:
-        df = seo.get_serps(i,pages=1)
-
+        ERROR = True
+        while ERROR:
+            try:
+                df = seo.get_serps(i,pages=1)
+                ERROR = False
+            except:
+                pass
         description_array.append(list(df['text']))
         name_array.append(list(df['title']))
         link_array.append(list(df['link']))
