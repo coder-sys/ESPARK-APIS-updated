@@ -3,6 +3,8 @@ import time
 from youtubesearchpython import VideosSearch
 import urllib.request
 import urllib.parse
+from googlesearch import search
+import metadata_parser
 import requests
 from datetime import date
 from ecommercetools import seo
@@ -248,27 +250,7 @@ def get_folders(name):
         print('cannot do so')
         return {'data':"undoable"}
 
-
-@app.route('/get_google_content/<query>',methods=['GET'])
-def get_google_content(query):
-    @after_this_request
-    def add_header(response):
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        return response
-
-    description_array = []
-
-    df = seo.get_serps(query, pages=3)
-    description_array = list(df['text'])
-    name_array = list(df['title'])
-    site_urls_array = list(df['link'])
-    return {
-        'description':description_array,
-         'names':name_array,
-            'urls': site_urls_array
-    }
-
-    '''
+def fallback_getter(query):
     jsonified_data = []
 
     array = [urllib.parse.urlparse(name).netloc for name in list(search(query))]
@@ -280,10 +262,9 @@ def get_google_content(query):
         try:
             page = metadata_parser.MetadataParser(_)
             pages.append(page)
-        # pages = [metadata_parser.MetadataParser(_) for _ in list(search(query))]
+            pages = [metadata_parser.MetadataParser(_) for _ in list(search(query))]
         except:
             jsonified_data.append("The description is hidden by the website")
-    print(pages)
     for data in pages:
         try:
             jsonified_data.append(data.metadata['meta']['description'])
@@ -291,7 +272,28 @@ def get_google_content(query):
             jsonified_data.append("The description is hidden by the website")
 
     return {'description': jsonified_data, 'names': array, 'urls': list(search(query))}
-'''
+
+@app.route('/get_google_content/<query>',methods=['GET'])
+def get_google_content(query):
+    @after_this_request
+    def add_header(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+
+    description_array = []
+    try:
+        df = seo.get_serps(query, pages=3)
+        description_array = list(df['text'])
+        name_array = list(df['title'])
+        site_urls_array = list(df['link'])
+        return {
+            'description':description_array,
+            'names':name_array,
+                'urls': site_urls_array
+        }
+    except:
+        return fallback_getter(query)
+
 
 @app.route('/add_google_content/<name>/<foldername>/<sourcename>/<sourcepath>/<description>',methods=['GET'])
 def add_google_content(name,foldername,sourcename,sourcepath,description):
@@ -728,9 +730,5 @@ def monthly_fee():
             count += 1
     return {'data':count*10,'data_str':str(count*10)}
 if __name__=='__main__':
-<<<<<<< HEAD
-    app.run()
-=======
-    app.run(debug=True,host="localhost",port=8000)
->>>>>>> 927a298582477324621c90f8b95736115be7de83
+    app.run(debug=True, host="localhost")
 
